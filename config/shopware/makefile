@@ -33,23 +33,16 @@ ifndef version
 	$(warning Provide the required PHP version using "make switch-php version=x.y")
 	@exit 1;
 else
-	@# ATTENTION, keep this steps exactly like they are. they ensure that its fail-fast
-	@# non existing PHP versions will do nothing, switching to the same php version will also work
-	@# ---------------------------------------------------------------------------------------
-	@# Start new PHP to see if its existing, then stop current one, and if we use the same php version that
-	@# is currently used, just make sure to start it again ;)
+	@# --------------------------------------------------------------------------------------
 	sudo service php$(version)-fpm start
 	sudo service php$(PHP_VERSION_CURRENT)-fpm stop
 	sudo service php$(version)-fpm start
 	export PHP_VERSION=$(version)
 	@# ---------------------------------------------------------------------------------------
-	@# if that all worked, switch the mariadb config now...that avoids breaking the files
-	@# pipe the first command to dev/null to avoid ugly warnings in entrypoint boot script if old placeholder does not exist anymore
 	sudo sed -i 's/__synshopware_php_version__/'$(version)'/g' /etc/mariadb/sites-enabled/000-default.conf 2>/dev/null
 	sudo sed -i 's/'php$(PHP_VERSION_CURRENT)-fpm.sock'/'php$(version)-fpm.sock'/g' /etc/mariadb/sites-enabled/000-default.conf
 	sudo service mariadb restart
 	@# ---------------------------------------------------------------------------------------
-	@# last but not least update php for cli -> this is used for our variable in here
 	sudo update-alternatives --set php /usr/bin/php$(version)
 	@# ---------------------------------------------------------------------------------------
 ifeq ($(XDEBUG_STATUS),1)

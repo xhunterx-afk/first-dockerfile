@@ -96,9 +96,8 @@ RUN echo "source /var/www/.nvm/nvm.sh" >> /var/www/.bashrc \
 
 RUN apt-get update && apt-get install -y nginx
 
-# Configure nginx - http
 COPY config/nginx/nginx.conf /etc/nginx/nginx.conf
-# Configure nginx - default server
+
 COPY config/conf.d /etc/nginx/sites-available
 
 COPY config/nginx/status.conf /etc/nginx/conf.d/status.conf
@@ -153,7 +152,6 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
     && sudo service php8.2-fpm start
 
-# Configure PHP-FPM
 COPY config/php/fpm-pool.conf /etc/php/8.2/fpm/pool.d/www.conf
 COPY config/php/php.ini /etc/php/8.2/conf.d/custom.ini
 COPY config/php/general.ini /etc/php/8.2/fpm/conf.d/01-general.ini
@@ -163,23 +161,18 @@ COPY config/php/general.ini /etc/php/8.1/fpm/conf.d/01-general.ini
 COPY config/php/general.ini /etc/php/8.1/cli/conf.d/01-general.ini
 COPY config/php/cli.ini /etc/php/8.1/cli/conf.d/01-general-cli.ini
 
-#make sure the installation runs also in default php version
 RUN sudo update-alternatives --set php /usr/bin/php8.2 > /dev/null 2>&1 &
-# make sure the installation runs using our default php version
 RUN service php8.2-fpm stop > /dev/null 2>&1  \
     && service php8.2-fpm start \
     && sudo update-alternatives --set php /usr/bin/php8.2 > /dev/null 2>&1
 
-# make sure our php user has rights on the session
 RUN chown www-data:www-data -R /var/lib/php/sessions
 
-# remove the standard nginx index file
 RUN mkdir -p /var/www/html \
     && rm -rf /var/www/html/* \
     && chown -R www-data:www-data /var/www/html \
     && sudo -u www-data sh -c 'mkdir -p /var/www/html/public'
 
-# make sure the configured log folder exists and is writeable
 RUN sudo chmod -R 0777 /var/www \
     && chgrp -R www-data /var/log/nginx \
     && mkdir -p /var/log/mariadb \
@@ -194,7 +187,6 @@ RUN sudo chmod -R 0777 /var/www \
 ## ***********************************************************************
 ##  XDEBUG INSTALLATION + SETUP
 ## ***********************************************************************
-# install xdebug for php 8.2
 RUN cd /var/www \
     && apt-get update \
     && sudo apt-get install -y php8.2-dev \
@@ -215,7 +207,6 @@ RUN cd /var/www \
     && sudo phpize8.2 --clean \
     && sudo apt-get remove -y php8.2-dev
 
-    # install xdebug for php 8.1
 RUN sudo apt-get install -y php8.1-dev \
     && cd /var/www \
     && rm -rf xdebug \
@@ -237,7 +228,6 @@ RUN sudo apt-get install -y php8.1-dev \
     && sudo rm -rf /var/lib/apt/lists/* /var/cache/apt/* \
     && sudo rm -rf /var/www/xdebug
 
-#generate xdebug ini files
 
 COPY config/php/xdebug-3.ini /etc/php/8.2/fpm/conf.d/20-xdebug.ini
 COPY config/php/xdebug-3.ini /etc/php/8.2/cli/conf.d/20-xdebug.ini
@@ -272,7 +262,6 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && sudo service mariadb start
 
 
-# copy custom configuration to the image and change rights
 COPY config/mariadb/50-server.cnf /etc/mysql/mariadb.conf.d/50-server.cnf
 
 RUN sudo chmod 0644 /etc/mysql/mariadb.conf.d/50-server.cnf
@@ -399,8 +388,6 @@ RUN sudo service mariadb start \
     && echo "MAILER_URL=smtp://localhost:1025/" >> /var/www/html/.env \
     && sudo service mariadb stop
 
-
-#    && cd /var/www/html && composer require --dev dev-tools \
 
 COPY config/shopware/composer.json /var/www/html
 

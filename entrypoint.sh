@@ -48,7 +48,6 @@ echo "MAILCATCHER URL: http://localhost:1080/"
 
 
 
-# checks if a different username is set in ENV and create if its not existing yet
 if [ $SSH_USER != "not-set" ] && (! id -u "${SSH_USER}" >/dev/null 2>&1 ); then
     echo "Synshopware: creating additional SSH user...."
     sudo adduser --disabled-password --uid 8888 --gecos "" --ingroup www-data $SSH_USER
@@ -69,7 +68,6 @@ echo "--------------------------------------------------------------------------
 sudo service ssh restart
 
 
-# grant all privileges to root
 
 sudo mysql --user=root --password=root -e "GRANT ALL PRIVILEGES ON *.* TO root@'%' IDENTIFIED BY 'root';FLUSH PRIVILEGES;"
 
@@ -77,14 +75,10 @@ sudo mysql --user=root --password=root -e "GRANT ALL PRIVILEGES ON *.* TO root@'
 if [ "$MYSQL_USER" != "not-set" ] && [ "$MYSQL_PWD" != "not-set" ]; then
   echo "-----------------------------------------------------------------Creating a new MYSQL user.... "
 
-  # add a new MYSQL user
-  #-------------------------------------------------------------------------------
     sudo mysql --user=root --password=root -e "CREATE USER IF NOT EXISTS '"$MYSQL_USER"'@'%' IDENTIFIED BY '"$MYSQL_PWD"';";
     sudo mysql --user=root --password=root -e "use mysql; update user set host='%' where user='$MYSQL_USER';";
     sudo mysql --user=root --password=root -e "GRANT ALL PRIVILEGES ON *.* TO '"$MYSQL_USER"'@'%' IDENTIFIED BY '$MYSQL_PWD';";
 
-  # flush privileges
-  #-------------------------------------------------------------------------------
     sudo mysql --user=root --password=root -e "FLUSH PRIVILEGES;";
 
     echo"---------------------a new MYSQL user has been added Welcome $MYSQL_USER-----------------------"
@@ -110,8 +104,6 @@ if [ $XDEBUG_ENABLED = 1 ]; then
 fi
 
 if [ $SHOP_DOMAIN != "localhost" ]; then
-  # update our domain. this means we can use the
-    # SHOP DOMAIN as environment variable
     echo "----------------------------------------------------------Updating domain to ${SHOP_DOMAIN}..."
     sh /var/www/scripts/shopware/update_domain.sh
     echo "-----------------------------------------------------------------------------------------------"
@@ -131,7 +123,6 @@ fi
 echo "----------------------------------------------------------------------------Restarting NGINX..."
 sudo service nginx restart
 echo "-----------------------------------------------------------------------------------------------"
-# testing the nginx configuration
 echo "-------------------------------------------------------------------------------Testing NGINX..."
 sudo nginx -t
 echo "-----------------------------------------------------------------------------------------------"

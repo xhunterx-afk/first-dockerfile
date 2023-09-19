@@ -1,6 +1,5 @@
 echo " Activating Xdebug..."
 
-#make sure we use the current running php version and not that one from the ENV
 PHP_VERSION_RUNNING=$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
 
 sudo mv /etc/php/${PHP_VERSION_RUNNING}/fpm/conf.d/20-xdebug.ini_disabled /etc/php/${PHP_VERSION_RUNNING}/fpm/conf.d/20-xdebug.ini  > /dev/null 2>&1 &
